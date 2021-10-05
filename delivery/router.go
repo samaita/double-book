@@ -7,10 +7,17 @@ import (
 func InitHandler() {
 	router := gin.Default()
 
-	authorized := router.Group("/api/flashsale/")
-	authorized.Use()
+	flashsale := router.Group("/api/flashsale/")
+	flashsale.Use()
 	{
-		authorized.GET("/list", handleGetFlashSaleList)
+		flashsale.GET("/list", handleGetFlashSaleList)
+	}
+
+	cart := router.Group("/api/cart/")
+	cart.Use(IsLoggedIn())
+	{
+		cart.POST("/add", handleAddToCart)
+		// atc.GET("/checkout", handleCheckout)
 	}
 
 	router.Run(":3000")
