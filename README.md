@@ -149,9 +149,12 @@ To perform this solution, the stack used are:
 - Consumer ATC discard all irrelevant message received, for example: Consumer assigned to process ATC for product 555 only, if any message inbound contain ATC for product 123, this consumer will discard it.
 - Consumer ATC discard all ATC message if a process success query but no row affected.
 - Consumer ATC will back processing message if there is back in stock message from cron.
-- Consumer ATC will then publish an information to MQ to be consumed by Main consumer success or not.
+- Consumer ATC will then publish an information to MQ to be consumed by Main consumer.
+- This message play as Hook Message, contain if a user success ATC or not.
+- Main Consumer will process the message to sync with channel go routine -- or cache map
 - Again, Main Consumer discard all irrelevant message received by only process message with his IP.
-- Main Consumer then gave information to Backend service handler to return the response.
+- Main Consumer then gave information to Backend service
+- Backend Service handler ACK the information, then return the response.
 - A cron run to evaluate Cart & Invoice. Any cart or invoice with flash sale product will have to be paid under 5 minutes or the product cart will be removed and invoice will be cancelled. Thus the stock will be +1
 
 ## Database Design
@@ -175,39 +178,45 @@ There are 10 Table:
 - `Flash Sale Detail` contain all product id that will be in flash sale.
 
 ## How to Run the Solution
-```
-docker compose
-```
+- Clone this repo
+- Run `go mod vendor`
+- Make sure you have SQLite3 lib
+- Download NSQ https://nsq.io/deployment/installing.html
+    - Run NSQ Admin
+    - Run NSQd with default setting
+- Run `make run`
 ## How to test the Solution
 
-Hit API X to create a new flash sale
+(Update 5 October 2021)
+**This solution is incomplete**
+
+To test, the idea is to create a cron that capable to register 10.000 to run at the same time. All user trying to ATC 1 product ID.
+Sample cURL to be replicated:
 ```
+curl --location --request POST '127.0.0.1:3000/api/cart/add' \
+--header 'USER_ID: 5' \
+--form 'flashsale_id="1"' \
+--form 'product_id="10"' \
+--form 'amount="1"'
 
 ```
-Hit API Y to add product with predefined stock
+Replace USER_ID with int between 1 - 10.000
+
+This test success if:
+- Stock 0 not negative
+```
+SELECT * FROM stock WHERE product_id = 10
 ```
 
+- Total Cart Detail with Product ID X is exactly the prepared stock.
 ```
-Hit API Z to add product to flash sale
+SELECT * FROM cart_detail WHERE product_id = 10
 ```
-
-```
-
-Note flash sale ID & product ID
-in folder functional_test run
-```
--flashsale=123 -productID=456 -h your_sdocker or http://....
-```
-wait for bot to struggling in 30s, ahh feels like Squid Game!
-```
-
-```
-The script hit API A to get current stock for the product ID
-
-The script also hit API B to get all invoice with product ID 
 
 ## Conclusion
 There is no perfect solution, this one might be one of the alternative out there. Hopefully this solution can be your consideration to prevent double book or inventory negative in your service.
+
+The PoC & Test is incomplete, lets see if we have any other time to continue.
 
 Pros:
  - People will fight in ATC, once it already in their cart, they can proceed at ease.
