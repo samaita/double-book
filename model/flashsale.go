@@ -9,11 +9,11 @@ import (
 )
 
 type FlashSale struct {
-	FlashSaleID  int64                     `json:"flashsale_id"`
-	Name         string                    `json:"name"`
-	Status       int                       `json:"status"`
-	ScheduleTime time.Time                 `json:"schedule_time"`
-	Detail       map[int64]FlashSaleDetail `json:"detail"`
+	FlashSaleID  int64             `json:"flashsale_id"`
+	Name         string            `json:"name"`
+	Status       int               `json:"status"`
+	ScheduleTime time.Time         `json:"schedule_time"`
+	Detail       []FlashSaleDetail `json:"detail"`
 }
 
 type FlashSaleDetail struct {
@@ -26,7 +26,7 @@ type FlashSaleDetail struct {
 func NewFlashSale(id int64) FlashSale {
 	return FlashSale{
 		FlashSaleID: id,
-		Detail:      make(map[int64]FlashSaleDetail),
+		Detail:      []FlashSaleDetail{},
 	}
 }
 
@@ -83,7 +83,7 @@ func (fs *FlashSale) GetDetail() error {
 			return err
 		}
 
-		fs.Detail[flashSaleDetail.ProductID] = flashSaleDetail
+		fs.Detail = append(fs.Detail, flashSaleDetail)
 	}
 
 	return nil
