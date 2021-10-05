@@ -41,3 +41,7 @@ func (db *DBProvider) QueryContext(ctx context.Context, query string, args ...in
 func (db *DBProvider) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
 	return db.Connection.ExecContext(ctx, query, args...)
 }
+
+func (db *DBProvider) Begin() (*sql.Tx, error) {
+	return db.Connection.Begin()
+}
