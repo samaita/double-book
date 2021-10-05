@@ -200,6 +200,29 @@ func (c *Cart) Remove(productID int64, amount int) error {
 	return nil
 }
 
+func (c *Cart) UpdateDetailStatus(prevStatus, nextStatus int) error {
+	var (
+		query string
+		err   error
+	)
+
+	query = `
+		UPDATE cart_detail
+		SET status = $1, update_time = $2
+		WHERE cart_id = $3 AND status = $4
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	if _, err = repository.DB.ExecContext(ctx, query, nextStatus, time.Now(), c.CartID, prevStatus); err != nil {
+		log.Printf("[Cart][UpdateDetailStatus][Exec] Input: %d Output: %v", c.CartID, err)
+		return err
+	}
+
+	return nil
+}
+
 func (c *Cart) GetDetail(status int) error {
 	var (
 		query string
