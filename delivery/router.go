@@ -7,10 +7,10 @@ import (
 func InitHandler() {
 	router := gin.Default()
 
-	authorized := router.Group("/api")
+	authorized := router.Group("/api/flashsale/")
 	authorized.Use()
 	{
-		authorized.GET("/user/info", handleGetUserInfo)
+		authorized.GET("/list", handleGetFlashSaleList)
 	}
 
 	router.Run(":3000")

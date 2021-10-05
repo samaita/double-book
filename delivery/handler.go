@@ -1,25 +1,32 @@
 package delivery
 
 import (
+	"log"
+	"time"
+
 	"github.com/gin-gonic/gin"
-	"github.com/samaita/double-book/model"
+	"github.com/samaita/double-book/usecase"
 )
 
-func handleGetUserInfo(c *gin.Context) {
+func handleGetFlashSaleList(c *gin.Context) {
 	var (
-	// err error
+		err  error
+		date string
+		data []usecase.FlashSaleListData
 	)
 
-	UID := c.GetString(model.CtxUID)
+	if date = c.Query("date"); date == "" {
+		date = time.Now().Format("2006-01-02")
+	}
 
-	// if err = newUser.getUserInfo(); err != nil {
-	// 	log.Printf("[handleGetUserInfo][getUserInfo] Input: %v, Output %v", newUser.UID, err.Error())
-	// 	APIResponseInternalServerError(c, nil, err.Error())
-	// 	return
-	// }
+	if data, err = usecase.HandleGetFlashSaleByDate(date); err != nil {
+		log.Printf("[handleGetUserInfo][getUserInfo] Input: %s, Output %s", date, err.Error())
+		APIResponseInternalServerError(c, nil, err.Error())
+		return
+	}
 
 	response := map[string]interface{}{
-		"uid": UID,
+		"data": data,
 	}
 
 	APIResponseOK(c, response)
