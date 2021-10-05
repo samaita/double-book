@@ -25,7 +25,7 @@ func InitDB(typeDB, conn string) {
 		log.Fatalf("[InitDB][sqlx.Connect] Input: %v Output: %v", conn, err)
 	}
 
-	if _, err = DB.QueryContext(context.Background(), "SELECT 1 FROM user_credential", nil); err != nil {
+	if _, err = DB.QueryContext(context.Background(), "SELECT 1 FROM user", nil); err != nil {
 		log.Fatalf("[InitDB][QueryContext] Input: %v Output: %v", conn, err)
 	}
 }
