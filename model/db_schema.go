@@ -6,6 +6,8 @@ const (
 	(
 	   "user_id"     INTEGER NOT NULL UNIQUE,
 	   "username"    TEXT UNIQUE,
+	   "display_name"TEXT,
+	   "image_url"   TEXT,
 	   "password"    TEXT,
 	   "status"      INTEGER,
 	   "create_time" TEXT,
