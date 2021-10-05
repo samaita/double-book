@@ -27,9 +27,12 @@ func IsLoggedIn() gin.HandlerFunc {
 			if err = user.Load(); err == nil {
 				c.Set(CTX_USERID, c.Request.Header.Get("USER_ID"))
 				c.Next()
+			} else {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, defaultError)
 			}
+		} else {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, defaultError)
 		}
 
-		c.AbortWithStatusJSON(http.StatusUnauthorized, defaultError)
 	}
 }
