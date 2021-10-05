@@ -8,7 +8,7 @@ import (
 )
 
 var Producer *nsq.Producer
-var MapGoChannel map[string](chan int)
+var MapGoChannel map[string]int
 
 func InitPublisher() {
 	var (
@@ -21,7 +21,7 @@ func InitPublisher() {
 		log.Fatal("[Producer][MQ] Err:", err)
 	}
 
-	MapGoChannel = make(map[string]chan int)
+	MapGoChannel = make(map[string]int)
 }
 
 func Publish(topic string, payload interface{}) error {

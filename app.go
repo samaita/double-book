@@ -16,6 +16,7 @@ func main() {
 	repository.GetIP()
 
 	go usecase.InitConsumerFlashSale()
+	go usecase.InitConsumerFlashSaleHook()
 
 	delivery.InitHandler()
 }
