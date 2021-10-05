@@ -38,22 +38,22 @@ func InitConsumerFlashSale() {
 		log.Fatalln("[InitConsumerFlashSale][HandleGetFlashSaleByDate] Consumer cant't start, err:", err)
 	}
 
-	var listChannelToCreate []string
+	listChannelToCreate := make(map[int64]string)
 	for _, flashSaleToday := range listFlashSaleToday {
 		for _, product := range flashSaleToday.ProductList {
-			listChannelToCreate = append(listChannelToCreate, fmt.Sprintf("flashsale_%d_product_%d", flashSaleToday.FlashSale.FlashSaleID, product.ProductID))
+			listChannelToCreate[product.ProductID] = fmt.Sprintf("flashsale_%d_product_%d", flashSaleToday.FlashSale.FlashSaleID, product.ProductID)
 		}
 	}
 
 	wg := &sync.WaitGroup{}
 
-	for _, channelToCreate := range listChannelToCreate {
+	for productID, channelToCreate := range listChannelToCreate {
 		wg.Add(1)
 
 		config := nsq.NewConfig()
 		q, _ := nsq.NewConsumer(TOPIC_FLASH_SALE, channelToCreate, config)
 		q.AddHandler(nsq.HandlerFunc(func(message *nsq.Message) error {
-			HandleAddToCartNSQ(message.Body)
+			HandleAddToCartNSQ(productID, message.Body)
 			return nil
 		}))
 		err := q.ConnectToNSQD("127.0.0.1:4150")
@@ -114,7 +114,7 @@ func HandleFlashSaleHookNSQ(b []byte) {
 
 }
 
-func HandleAddToCartNSQ(b []byte) {
+func HandleAddToCartNSQ(productID int64, b []byte) {
 	var (
 		data ATCNSQPayload
 		err  error
@@ -126,6 +126,10 @@ func HandleAddToCartNSQ(b []byte) {
 	}
 
 	data.Success = model.StatusFailedATC
+
+	if productID != data.ProductID {
+		return
+	}
 
 	product := model.NewProduct(data.ProductID)
 	if err = product.GetStock(); err != nil {

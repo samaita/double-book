@@ -142,9 +142,10 @@ To perform this solution, the stack used are:
 ![Logic](https://1.bp.blogspot.com/-Nee8-1Dyjl4/YVthhuHUmdI/AAAAAAAATCA/NdmPBCWyjf8eWjusFWYyb7U8JXgt7Cg2wCLcBGAsYHQ/s2048/Evermos%2BFlow.png)
 
 - Mass traffic request hit the backend service.
-- Backend service handler publish each request into a ATC message to a MQ ATC
-- Backend service handler set to wait for confirmation listen to a channel with go routine
-- MQ ATC set to 1 topic & N channel per flash sale, where N is the amount of product listed during flash sale. Each channel only have 1 consumer 1 goroutine to process the ATC & stock decrement.
+- Backend service handler publish each request, it convert into MQ message
+- Backend service handler set to wait for confirmation listen to a channel with go routine -- or cache map
+- MQ has a consumer named consumer ATC
+- Consumer ATC set to 1 topic & N channel per flash sale, where N is the amount of product id listed during flash sale. Each channel only have 1 consumer 1 goroutine to process the ATC & stock decrement.
 - Consumer ATC discard all irrelevant message received, for example: Consumer assigned to process ATC for product 555 only, if any message inbound contain ATC for product 123, this consumer will discard it.
 - Consumer ATC discard all ATC message if a process success query but no row affected.
 - Consumer ATC will back processing message if there is back in stock message from cron.
