@@ -88,5 +88,26 @@ const (
 	   "status"            INTEGER,
 	   "create_time"       TEXT,
 	   "update_time"       TEXT
-	);  `
+	);  
+
+  CREATE TABLE "flashsale"
+	(
+	   "flashsale_id" 	INTEGER PRIMARY KEY AUTOINCREMENT,
+	   "name"        	INTEGER,
+	   "status"			INTEGER,
+	   "create_time"    TEXT,
+	   "update_time"    TEXT,
+	   "schedule_time"	TEXT
+	);  
+
+  CREATE TABLE "flashsale_detail"
+	(
+	   "flashsale_detail_id" INTEGER PRIMARY KEY AUTOINCREMENT,
+	   "flashsale_id"        INTEGER,
+	   "product_id"        	 INTEGER,
+	   "status"        		 INTEGER,
+	   "create_time"       	 TEXT,
+	   "update_time"         TEXT
+	);  
+	`
 )

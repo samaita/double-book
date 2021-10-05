@@ -8,6 +8,12 @@ import (
 	"github.com/samaita/double-book/repository"
 )
 
+const (
+	StatusFlashSalePublished = 2
+	StatusFlashSaleSet       = 1
+	StatusFlashSaleNonActive = 0
+)
+
 type FlashSale struct {
 	FlashSaleID  int64             `json:"flashsale_id"`
 	Name         string            `json:"name"`
@@ -114,7 +120,7 @@ func GetFlashSaleByDate(date string, status int) ([]FlashSale, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	result, err := repository.DB.QueryContext(ctx, query, timeFlashSaleDayStart, timeFlashSaleDayEnd)
+	result, err := repository.DB.QueryContext(ctx, query, timeFlashSaleDayStart, timeFlashSaleDayEnd, status)
 	if err != nil {
 		log.Printf("[GetFlashSaleByDate][Query] Input: %s Output: %v", date, err)
 		return listFlashSale, err
