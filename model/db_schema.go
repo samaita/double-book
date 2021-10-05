@@ -10,8 +10,8 @@ const (
 	   "image_url"   TEXT,
 	   "password"    TEXT,
 	   "status"      INTEGER,
-	   "create_time" TEXT,
-	   "update_time" TEXT
+	   "create_time" DATETIME,
+	   "update_time" DATETIME
 	);
   
   CREATE TABLE "shop"
@@ -22,8 +22,8 @@ const (
 	   "image_url"   TEXT,
 	   "domain"      TEXT,
 	   "status"      INTEGER,
-	   "create_time" TEXT,
-	   "update_time" TEXT
+	   "create_time" DATETIME,
+	   "update_time" DATETIME
 	);
   
   CREATE TABLE "product"
@@ -33,8 +33,8 @@ const (
 	   "name"        TEXT,
 	   "image_url"   TEXT,
 	   "status"      INTEGER,
-	   "create_time" TEXT,
-	   "update_time" TEXT
+	   "create_time" DATETIME,
+	   "update_time" DATETIME
 	);
   
   CREATE TABLE "stock"
@@ -45,8 +45,8 @@ const (
 	   "total"          INTEGER,
 	   "remaining"      INTEGER,
 	   "status"         INTEGER,
-	   "create_time"    TEXT,
-	   "update_time"    TEXT
+	   "create_time"    DATETIME,
+	   "update_time"    DATETIME
 	);
   
   CREATE TABLE "cart"
@@ -54,8 +54,8 @@ const (
 	   "cart_id"     INTEGER PRIMARY KEY AUTOINCREMENT,
 	   "user_id"     INTEGER,
 	   "status"      INTEGER,
-	   "create_time" TEXT,
-	   "update_time" TEXT
+	   "create_time" DATETIME,
+	   "update_time" DATETIME
 	);
   
   CREATE TABLE "cart_detail"
@@ -65,8 +65,8 @@ const (
 	   "product_id"     INTEGER,
 	   "amount"         INTEGER,
 	   "status"         INTEGER,
-	   "create_time"    TEXT,
-	   "update_time"    TEXT
+	   "create_time"    DATETIME,
+	   "update_time"    DATETIME
 	);
   
   CREATE TABLE "invoice"
@@ -74,8 +74,8 @@ const (
 	   "invoice_id"  INTEGER PRIMARY KEY AUTOINCREMENT,
 	   "user_id"     INTEGER,
 	   "status"      INTEGER,
-	   "create_time" TEXT,
-	   "update_time" TEXT
+	   "create_time" DATETIME,
+	   "update_time" DATETIME
 	);
   
   CREATE TABLE "invoice_detail"
@@ -86,8 +86,8 @@ const (
 	   "price_paid"        INTEGER,
 	   "amount"            INTEGER,
 	   "status"            INTEGER,
-	   "create_time"       TEXT,
-	   "update_time"       TEXT
+	   "create_time"       DATETIME,
+	   "update_time"       DATETIME
 	);  
 
   CREATE TABLE "flashsale"
@@ -95,9 +95,9 @@ const (
 	   "flashsale_id" 	INTEGER PRIMARY KEY AUTOINCREMENT,
 	   "name"        	INTEGER,
 	   "status"			INTEGER,
-	   "create_time"    TEXT,
-	   "update_time"    TEXT,
-	   "schedule_time"	TEXT
+	   "create_time"    DATETIME,
+	   "update_time"    DATETIME,
+	   "schedule_time"	DATETIME
 	);  
 
   CREATE TABLE "flashsale_detail"
@@ -106,8 +106,8 @@ const (
 	   "flashsale_id"        INTEGER,
 	   "product_id"        	 INTEGER,
 	   "status"        		 INTEGER,
-	   "create_time"       	 TEXT,
-	   "update_time"         TEXT
+	   "create_time"       	 DATETIME,
+	   "update_time"         DATETIME
 	);  
 	`
 )
