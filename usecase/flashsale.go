@@ -19,7 +19,7 @@ func HandleGetFlashSaleByDate(date string) ([]FlashSaleListData, error) {
 	)
 
 	if flashSaleList, err = model.GetFlashSaleByDate(date, model.StatusFlashSalePublished); err != nil {
-		log.Printf("[handleGetFlashSaleByDate][GetFlashSaleByDate] Input: %s Output: %v", date, err)
+		log.Printf("[HandleGetFlashSaleByDate][GetFlashSaleByDate] Input: %s Output: %v", date, err)
 		return resp, err
 	}
 
@@ -29,7 +29,7 @@ func HandleGetFlashSaleByDate(date string) ([]FlashSaleListData, error) {
 		)
 
 		if err = flashSale.GetDetail(); err != nil {
-			log.Printf("[handleGetFlashSaleByDate][Flashsale][GetDetail] Input: %d Output: %v", flashSale.FlashSaleID, err)
+			log.Printf("[HandleGetFlashSaleByDate][Flashsale][GetDetail] Input: %d Output: %v", flashSale.FlashSaleID, err)
 			return resp, err
 		}
 		metadata.FlashSale = flashSale
@@ -39,19 +39,19 @@ func HandleGetFlashSaleByDate(date string) ([]FlashSaleListData, error) {
 			flashSaleProduct := model.NewProduct(productID)
 
 			if err = flashSaleProduct.Load(); err != nil {
-				log.Printf("[handleGetFlashSaleByDate][Product][Load] Input: %d Output: %v", productID, err)
+				log.Printf("[HandleGetFlashSaleByDate][Product][Load] Input: %d Output: %v", productID, err)
 				return resp, err
 			}
 
 			flashSaleShop := model.NewShop(flashSaleProduct.ShopID)
 			if err = flashSaleShop.Load(); err != nil {
-				log.Printf("[handleGetFlashSaleByDate][Shop][Load] Input: %d Output: %v", flashSaleProduct.ShopID, err)
+				log.Printf("[HandleGetFlashSaleByDate][Shop][Load] Input: %d Output: %v", flashSaleProduct.ShopID, err)
 				return resp, err
 			}
 			flashSaleProduct.Shop = flashSaleShop
 
 			if err = flashSaleProduct.GetStock(); err != nil {
-				log.Printf("[handleGetFlashSaleByDate][Product][GetStock] Input: %d Output: %v", productID, err)
+				log.Printf("[HandleGetFlashSaleByDate][Product][GetStock] Input: %d Output: %v", productID, err)
 				return resp, err
 			}
 			metadata.ProductList = append(metadata.ProductList, flashSaleProduct)
