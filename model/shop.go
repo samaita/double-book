@@ -48,7 +48,7 @@ func (s *Shop) Load() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	if err = repository.DB.QueryRowContext(ctx, query, s.ShopID).Scan(&s.UserID, &s.Name, &s.ImageURL, &s.Domain, s.Status); err != nil {
+	if err = repository.DB.QueryRowContext(ctx, query, s.ShopID).Scan(&s.UserID, &s.Name, &s.ImageURL, &s.Domain, &s.Status); err != nil {
 		log.Printf("[Shop][Load] Input: %d Output: %v", s.ShopID, err)
 		return err
 	}

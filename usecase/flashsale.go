@@ -28,6 +28,10 @@ func HandleGetFlashSaleByDate(date string) ([]FlashSaleListData, error) {
 			metadata FlashSaleListData
 		)
 
+		if err = flashSale.GetDetail(); err != nil {
+			log.Printf("[handleGetFlashSaleByDate][Flashsale][GetDetail] Input: %d Output: %v", flashSale.FlashSaleID, err)
+			return resp, err
+		}
 		metadata.FlashSale = flashSale
 
 		for _, flashSaleDetail := range flashSale.Detail {
@@ -38,6 +42,13 @@ func HandleGetFlashSaleByDate(date string) ([]FlashSaleListData, error) {
 				log.Printf("[handleGetFlashSaleByDate][Product][Load] Input: %d Output: %v", productID, err)
 				return resp, err
 			}
+
+			flashSaleShop := model.NewShop(flashSaleProduct.ShopID)
+			if err = flashSaleShop.Load(); err != nil {
+				log.Printf("[handleGetFlashSaleByDate][Shop][Load] Input: %d Output: %v", flashSaleProduct.ShopID, err)
+				return resp, err
+			}
+			flashSaleProduct.Shop = flashSaleShop
 
 			if err = flashSaleProduct.GetStock(); err != nil {
 				log.Printf("[handleGetFlashSaleByDate][Product][GetStock] Input: %d Output: %v", productID, err)

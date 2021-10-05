@@ -15,6 +15,7 @@ const (
 type Product struct {
 	ProductID     int64  `json:"product_id"`
 	ShopID        int64  `json:"shop_id"`
+	Shop          Shop   `json:"shop"`
 	Name          string `json:"name"`
 	ImageURL      string `json:"image_url"`
 	PriceNormal   int64  `json:"price_normal"`

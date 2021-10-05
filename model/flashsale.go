@@ -88,7 +88,7 @@ func (fs *FlashSale) GetDetail() error {
 			log.Printf("[FlashSale][GetDetail][Scan] Input: %d Output: %v", fs.FlashSaleID, err)
 			return err
 		}
-
+		flashSaleDetail.FlashSaleID = fs.FlashSaleID
 		fs.Detail = append(fs.Detail, flashSaleDetail)
 	}
 
@@ -109,7 +109,7 @@ func GetFlashSaleByDate(date string, status int) ([]FlashSale, error) {
 	}
 
 	timeFlashSaleDayStart := timeFlashSale
-	timeFlashSaleDayEnd := timeFlashSale.Add(23 * time.Hour).Add(59 * time.Minute)
+	timeFlashSaleDayEnd := timeFlashSale.Add(23 * time.Hour).Add(59 * time.Minute).Add(59 * time.Second)
 
 	query = `
 		SELECT flashsale_id, name, schedule_time
@@ -120,7 +120,7 @@ func GetFlashSaleByDate(date string, status int) ([]FlashSale, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	result, err := repository.DB.QueryContext(ctx, query, timeFlashSaleDayStart, timeFlashSaleDayEnd, status)
+	result, err := repository.DB.QueryContext(ctx, query, FormatTimeDB(timeFlashSaleDayStart), FormatTimeDB(timeFlashSaleDayEnd), status)
 	if err != nil {
 		log.Printf("[GetFlashSaleByDate][Query] Input: %s Output: %v", date, err)
 		return listFlashSale, err
