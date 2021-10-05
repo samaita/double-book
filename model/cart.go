@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"time"
 
@@ -278,15 +279,19 @@ func (c *Cart) IsExist(productID int64) (bool, error) {
 	query = `
 		SELECT 1 
 		FROM cart_detail
-		WHERE cart_id = $1 AND user_id = $2  AND prduct_id = $3 AND status = $4
+		WHERE cart_id = $1 AND product_id = $2 AND status = $3
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	if err = repository.DB.QueryRowContext(ctx, query, c.CartID, c.UserID, productID, StatusCartDetailActive).Scan(&exist); err != nil {
+	if err = repository.DB.QueryRowContext(ctx, query, c.CartID, productID, StatusCartDetailActive).Scan(&exist); err != nil && err != sql.ErrNoRows {
 		log.Printf("[Cart][GetDetail][Query] Input: %d Output: %v", c.CartID, err)
 		return false, err
+	}
+
+	if err == sql.ErrNoRows {
+		return false, nil
 	}
 
 	return exist == 1, nil

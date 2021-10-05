@@ -125,37 +125,55 @@ func HandleAddToCartNSQ(b []byte) {
 		return
 	}
 
+	data.Success = model.StatusFailedATC
+
 	product := model.NewProduct(data.ProductID)
 	if err = product.GetStock(); err != nil {
 		log.Printf("[HandleAddToCartNSQ][Cart][LoadByUser] Input: %v, Output %s", data.UserID, err.Error())
+		SendHook(data)
 		return
 	}
 
 	if product.Remaining <= 0 {
+		SendHook(data)
 		return
 	}
 
 	cart := model.NewCart(0)
 	if err = cart.LoadByUser(data.UserID); err != nil && err != sql.ErrNoRows {
 		log.Printf("[HandleAddToCartNSQ][Cart][LoadByUser] Input: %v, Output %s", data.UserID, err.Error())
+		SendHook(data)
 		return
 	}
 
 	if err == sql.ErrNoRows {
 		if err = cart.Create(data.UserID, model.StatusCartActive); err != nil {
 			log.Printf("[HandleAddToCartNSQ][Cart][Create] Input: %v, Output %s", data.UserID, err.Error())
+			SendHook(data)
 			return
 		}
 	}
 
 	isExist, err := cart.IsExist(data.ProductID)
 	if err != nil || isExist {
+		SendHook(data)
 		return
 	}
 
+	log.Println(err, isExist)
+
 	if err = cart.Add(data.ProductID, data.Amount); err == nil {
 		data.Success = model.StatusSuccessATC
+		SendHook(data)
 	}
+
+	return
+}
+
+func SendHook(data ATCNSQPayload) {
+	var (
+		err error
+	)
 
 	if err = repository.Publish("FLASH_SALE_HOOK", ATCNSQPayload{
 		UserID:      data.UserID,
@@ -169,6 +187,4 @@ func HandleAddToCartNSQ(b []byte) {
 		log.Printf("[HandleAddToCartNSQ][Publish] Input: %+v Output: %v", data, err)
 		return
 	}
-
-	return
 }
