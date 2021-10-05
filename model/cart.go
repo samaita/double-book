@@ -9,10 +9,13 @@ import (
 )
 
 const (
-	statusCartActive = 1
+	StatusCartActive = 1
 
-	statusCartDetailActive  = 1
-	statusCartDetailRemoved = 0
+	StatusCartDetailActive  = 1
+	StatusCartDetailRemoved = 0
+
+	StatusSuccessATC = 1
+	StatusFailedATC  = -1
 )
 
 type Cart struct {
@@ -47,15 +50,17 @@ func (c *Cart) Create(userID int64, status int) error {
 		(user_id, status, create_time)
 		VALUES
 		($1, $2, $3)
+		RETURNING cart_id
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	if _, err = repository.DB.ExecContext(ctx, query, userID, status, time.Now()); err != nil {
+	if err = repository.DB.QueryRowContext(ctx, query, userID, status, time.Now()).Scan(&c.CartID); err != nil {
 		log.Printf("[Cart][Create][Exec] Input: %d Output: %v", c.UserID, err)
 		return err
 	}
+	c.UserID = userID
 
 	return nil
 }
@@ -120,7 +125,7 @@ func (c *Cart) Add(productID int64, amount int) error {
 		VALUES
 		($1, $2, $3, $4, $5)`
 
-	if _, err = tx.Exec(query, c.CartID, productID, amount, statusCartDetailActive, time.Now()); err != nil {
+	if _, err = tx.Exec(query, c.CartID, productID, amount, StatusCartDetailActive, time.Now()); err != nil {
 		log.Printf("[Cart][Add][Exec] Input: %d Output: %v", c.UserID, err)
 		tx.Rollback()
 		return err
@@ -172,7 +177,7 @@ func (c *Cart) Remove(productID int64, amount int) error {
 		WHERE cart_id = $2 AND product_id = $3 AND amount > 0
 		RETURNING amount`
 
-	err = tx.QueryRow(query, amount, c.CartID, productID, amount, statusCartDetailRemoved, time.Now()).Scan(&existingAmount)
+	err = tx.QueryRow(query, amount, c.CartID, productID, amount, StatusCartDetailRemoved, time.Now()).Scan(&existingAmount)
 	if err != nil {
 		log.Printf("[Cart][Remove][QueryRow][Cart Detail] Input: %d Output: %v", c.UserID, err)
 		tx.Rollback()
@@ -185,7 +190,7 @@ func (c *Cart) Remove(productID int64, amount int) error {
 		SET status = $1
 		WHERE product_id = $2 AND remaining + $3 <= total`
 
-		if _, err := tx.Exec(query, statusCartDetailRemoved, amount, productID, amount); err != nil {
+		if _, err := tx.Exec(query, StatusCartDetailRemoved, amount, productID, amount); err != nil {
 			log.Printf("[Cart][Remove][Exect][Cart Detail] Input: %d Output: %v", productID, err)
 			tx.Rollback()
 			return err
@@ -261,4 +266,28 @@ func (c *Cart) GetDetail(status int) error {
 	}
 
 	return nil
+}
+
+func (c *Cart) IsExist(productID int64) (bool, error) {
+	var (
+		query string
+		err   error
+		exist int
+	)
+
+	query = `
+		SELECT 1 
+		FROM cart_detail
+		WHERE cart_id = $1 AND user_id = $2  AND prduct_id = $3 AND status = $4
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	if err = repository.DB.QueryRowContext(ctx, query, c.CartID, c.UserID, productID, StatusCartDetailActive).Scan(&exist); err != nil {
+		log.Printf("[Cart][GetDetail][Query] Input: %d Output: %v", c.CartID, err)
+		return false, err
+	}
+
+	return exist == 1, nil
 }

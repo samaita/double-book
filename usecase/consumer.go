@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,12 +9,16 @@ import (
 	"time"
 
 	"github.com/nsqio/go-nsq"
+	"github.com/samaita/double-book/model"
 	"github.com/samaita/double-book/repository"
 )
 
 const (
 	TOPIC_FLASH_SALE      = "FLASH_SALE"
 	TOPIC_FLASH_SALE_HOOK = "FLASH_SALE_HOOK"
+
+	REQUEUE = 1
+	FINISH  = 0
 )
 
 type ATCNSQPayload struct {
@@ -120,7 +125,37 @@ func HandleAddToCartNSQ(b []byte) {
 		return
 	}
 
-	// ATC
+	product := model.NewProduct(data.ProductID)
+	if err = product.GetStock(); err != nil {
+		log.Printf("[HandleAddToCartNSQ][Cart][LoadByUser] Input: %v, Output %s", data.UserID, err.Error())
+		return
+	}
+
+	if product.Remaining <= 0 {
+		return
+	}
+
+	cart := model.NewCart(0)
+	if err = cart.LoadByUser(data.UserID); err != nil && err != sql.ErrNoRows {
+		log.Printf("[HandleAddToCartNSQ][Cart][LoadByUser] Input: %v, Output %s", data.UserID, err.Error())
+		return
+	}
+
+	if err == sql.ErrNoRows {
+		if err = cart.Create(data.UserID, model.StatusCartActive); err != nil {
+			log.Printf("[HandleAddToCartNSQ][Cart][Create] Input: %v, Output %s", data.UserID, err.Error())
+			return
+		}
+	}
+
+	isExist, err := cart.IsExist(data.ProductID)
+	if err != nil || isExist {
+		return
+	}
+
+	if err = cart.Add(data.ProductID, data.Amount); err == nil {
+		data.Success = model.StatusSuccessATC
+	}
 
 	if err = repository.Publish("FLASH_SALE_HOOK", ATCNSQPayload{
 		UserID:      data.UserID,
@@ -129,9 +164,11 @@ func HandleAddToCartNSQ(b []byte) {
 		Amount:      data.Amount,
 		IPOrigin:    data.IPOrigin,
 		Timestamp:   data.Timestamp,
-		Success:     1,
+		Success:     data.Success,
 	}); err != nil {
 		log.Printf("[HandleAddToCartNSQ][Publish] Input: %+v Output: %v", data, err)
 		return
 	}
+
+	return
 }

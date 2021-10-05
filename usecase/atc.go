@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/samaita/double-book/model"
 	"github.com/samaita/double-book/repository"
 )
 
@@ -54,6 +55,6 @@ func HandleAddToCart(userID, productID, flashSaleID int64, amount int) (ATCData,
 		}
 	}
 
-	data.SuccessATC = success == 1
+	data.SuccessATC = success == model.StatusSuccessATC
 	return data, nil
 }
